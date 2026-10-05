@@ -10,7 +10,9 @@ const {
 const {
     addStudent,
     getAllStudents,
-    findStudent
+    findStudent,
+    updateStudent,
+    deleteStudent
 } = require("../services/studentService");
 
 const rl = readline.createInterface({
@@ -145,6 +147,90 @@ async function searchStudentMenu() {
     console.log(`Subject: ${student.subject}`);
 }
 
+async function updateStudentMenu() {
+    console.log("\n========== UPDATE STUDENT ==========\n");
+
+    const id = await ask("Enter Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    console.log("\nCurrent Student Information:");
+    console.log(`Name:    ${student.name}`);
+    console.log(`Subject: ${student.subject}`);
+
+    console.log("\nEnter new information:");
+
+    const name = await ask("Student Name: ");
+    const subject = await ask("Subject: ");
+
+    const quiz = await askGrade("Quiz Grade: ");
+    const assignments = await askGrade("Assignment Grade: ");
+    const project = await askGrade("Project Grade: ");
+    const midterm = await askGrade("Midterm Grade: ");
+    const finalExam = await askGrade("Final Exam Grade: ");
+
+    const grades = {
+        quiz,
+        assignments,
+        project,
+        midterm,
+        finalExam
+    };
+
+    try {
+        updateStudent(
+            id,
+            name,
+            subject,
+            grades
+        );
+
+        console.log("\nStudent successfully updated.");
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
+async function deleteStudentMenu() {
+    console.log("\n========== DELETE STUDENT ==========\n");
+
+    const id = await ask("Enter Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    console.log("\nStudent to be deleted:");
+    console.log(`ID:      ${student.id}`);
+    console.log(`Name:    ${student.name}`);
+    console.log(`Subject: ${student.subject}`);
+
+    const confirmation = await ask(
+        "\nAre you sure you want to delete this student? (Y/N): "
+    );
+
+    if (confirmation.toLowerCase() !== "y") {
+        console.log("\nDelete operation cancelled.");
+        return;
+    }
+
+    try {
+        deleteStudent(id);
+
+        console.log("\nStudent successfully deleted.");
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
 async function mainMenu() {
     while (true) {
         console.log(`
@@ -157,7 +243,9 @@ async function mainMenu() {
 2. Calculate Grade
 3. View Student Records
 4. Search Student
-5. Exit
+5. Update Student
+6. Delete Student
+7. Exit
 
 ========================================
 `);
@@ -182,6 +270,14 @@ async function mainMenu() {
                 break;
 
             case "5":
+                await updateStudentMenu();
+                break;
+
+            case "6":
+                await deleteStudentMenu();
+                break;
+
+            case "7":
                 console.log("\nThank you for using GradeCalc.");
                 rl.close();
                 return;

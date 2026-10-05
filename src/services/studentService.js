@@ -29,13 +29,20 @@ function saveStudents(students) {
 function addStudent(id, name, subject, grades) {
     const students = loadStudents();
 
-    const existingStudent = students.find(student => student.id === id);
+    const existingStudent = students.find(
+        student => student.id === id
+    );
 
     if (existingStudent) {
         throw new Error("A student with this ID already exists.");
     }
 
-    const student = new Student(id, name, subject, grades);
+    const student = new Student(
+        id,
+        name,
+        subject,
+        grades
+    );
 
     students.push(student);
     saveStudents(students);
@@ -50,7 +57,49 @@ function getAllStudents() {
 function findStudent(id) {
     const students = loadStudents();
 
-    return students.find(student => student.id === id);
+    return students.find(
+        student => student.id === id
+    );
+}
+
+function updateStudent(id, name, subject, grades) {
+    const students = loadStudents();
+
+    const index = students.findIndex(
+        student => student.id === id
+    );
+
+    if (index === -1) {
+        throw new Error("Student not found.");
+    }
+
+    students[index].name = name;
+    students[index].subject = subject;
+    students[index].grades = grades;
+
+    saveStudents(students);
+
+    return students[index];
+}
+
+function deleteStudent(id) {
+    const students = loadStudents();
+
+    const index = students.findIndex(
+        student => student.id === id
+    );
+
+    if (index === -1) {
+        throw new Error("Student not found.");
+    }
+
+    const deletedStudent = students[index];
+
+    students.splice(index, 1);
+
+    saveStudents(students);
+
+    return deletedStudent;
 }
 
 module.exports = {
@@ -58,5 +107,7 @@ module.exports = {
     saveStudents,
     addStudent,
     getAllStudents,
-    findStudent
+    findStudent,
+    updateStudent,
+    deleteStudent
 };
