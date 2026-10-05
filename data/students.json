@@ -1,0 +1,14 @@
+[
+    {
+        "id": "sherwin",
+        "name": "sherwin",
+        "subject": "301",
+        "grades": {
+            "quiz": 92,
+            "assignments": 90,
+            "project": 90,
+            "midterm": 90,
+            "finalExam": 90
+        }
+    }
+]
