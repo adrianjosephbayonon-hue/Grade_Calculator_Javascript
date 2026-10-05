@@ -1,0 +1,16 @@
+{
+  "name": "gradecalc-javascript",
+  "version": "1.0.0",
+  "description": "Grade Calculator System implemented in JavaScript for Programming Languages coursework",
+  "main": "src/terminal/app.js",
+  "scripts": {
+    "start": "node src/terminal/app.js"
+  },
+  "keywords": [
+    "grade-calculator",
+    "javascript",
+    "programming-languages"
+  ],
+  "author": "Adrian Joseph",
+  "license": "MIT"
+}
