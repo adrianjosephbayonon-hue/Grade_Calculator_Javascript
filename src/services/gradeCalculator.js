@@ -31,12 +31,51 @@ function calculateFinalGrade(grades) {
     );
 }
 
+function calculateBreakdown(grades) {
+    if (!validateGrades(grades)) {
+        throw new Error("All grades must be between 0 and 100.");
+    }
+
+    return {
+        quiz: {
+            grade: grades.quiz,
+            weight: WEIGHTS.quiz,
+            contribution: grades.quiz * WEIGHTS.quiz
+        },
+
+        assignments: {
+            grade: grades.assignments,
+            weight: WEIGHTS.assignments,
+            contribution: grades.assignments * WEIGHTS.assignments
+        },
+
+        project: {
+            grade: grades.project,
+            weight: WEIGHTS.project,
+            contribution: grades.project * WEIGHTS.project
+        },
+
+        midterm: {
+            grade: grades.midterm,
+            weight: WEIGHTS.midterm,
+            contribution: grades.midterm * WEIGHTS.midterm
+        },
+
+        finalExam: {
+            grade: grades.finalExam,
+            weight: WEIGHTS.finalExam,
+            contribution: grades.finalExam * WEIGHTS.finalExam
+        }
+    };
+}
+
 function getEquivalentGrade(finalGrade) {
     if (finalGrade >= 90) return "A";
     if (finalGrade >= 85) return "B+";
     if (finalGrade >= 80) return "B";
     if (finalGrade >= 75) return "C";
     if (finalGrade >= 70) return "D";
+
     return "F";
 }
 
@@ -49,6 +88,7 @@ module.exports = {
     validateGrade,
     validateGrades,
     calculateFinalGrade,
+    calculateBreakdown,
     getEquivalentGrade,
     getStatus
 };
