@@ -491,6 +491,73 @@ async function deleteStudentMenu() {
     }
 }
 
+async function academicSummaryMenu() {
+    console.log("\n========== ACADEMIC SUMMARY ==========\n");
+
+    const id = await ask("Enter Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    if (student.subjects.length === 0) {
+        console.log("\nThis student has no subjects.");
+        return;
+    }
+
+    let totalGrade = 0;
+
+    console.log("\n==============================================");
+    console.log("              ACADEMIC SUMMARY");
+    console.log("==============================================");
+    console.log(`Student:       ${student.name}`);
+    console.log(`Student ID:    ${student.id}`);
+    console.log("----------------------------------------------");
+    console.log(
+        "Subject                         Final Grade"
+    );
+    console.log("----------------------------------------------");
+
+    student.subjects.forEach(item => {
+        const finalGrade = calculateFinalGrade(
+            item.grades
+        );
+
+        totalGrade += finalGrade;
+
+        const subjectName = item.subject.padEnd(30, " ");
+
+        console.log(
+            `${subjectName}${finalGrade.toFixed(2)}`
+        );
+    });
+
+    const overallAverage =
+        totalGrade / student.subjects.length;
+
+    const equivalent =
+        getEquivalentGrade(overallAverage);
+
+    const status =
+        getStatus(overallAverage);
+
+    console.log("----------------------------------------------");
+    console.log(
+        `Overall Average: ${overallAverage.toFixed(2)}`
+    );
+    console.log(
+        `Overall Equivalent: ${equivalent}`
+    );
+    console.log(
+        `Overall Status:     ${status}`
+    );
+    console.log("==============================================");
+}
+
+
 async function mainMenu() {
     while (true) {
         console.log(`
@@ -504,11 +571,12 @@ async function mainMenu() {
 3. Calculate Grade
 4. View Student Records
 5. Search Student
-6. Update Student
-7. Update Subject Grades
-8. Delete Subject
-9. Delete Student
-10. Exit
+6. Academic Summary
+7. Update Student
+8. Update Subject Grades
+9. Delete Subject
+10. Delete Student
+11. Exit
 
 ========================================
 `);
@@ -516,55 +584,59 @@ async function mainMenu() {
         const choice = await ask("Enter choice: ");
 
         switch (choice) {
-            case "1":
-                await addStudentMenu();
-                break;
+    case "1":
+        await addStudentMenu();
+        break;
 
-            case "2":
-                await addSubjectMenu();
-                break;
+    case "2":
+        await addSubjectMenu();
+        break;
 
-            case "3":
-                await calculateStudentMenu();
-                break;
+    case "3":
+        await calculateStudentMenu();
+        break;
 
-            case "4":
-                await viewStudentsMenu();
-                break;
+    case "4":
+        await viewStudentsMenu();
+        break;
 
-            case "5":
-                await searchStudentMenu();
-                break;
+    case "5":
+        await searchStudentMenu();
+        break;
 
-            case "6":
-                await updateStudentMenu();
-                break;
+    case "6":
+        await academicSummaryMenu();
+        break;
 
-            case "7":
-                await updateSubjectMenu();
-                break;
+    case "7":
+        await updateStudentMenu();
+        break;
 
-            case "8":
-                await deleteSubjectMenu();
-                break;
+    case "8":
+        await updateSubjectMenu();
+        break;
 
-            case "9":
-                await deleteStudentMenu();
-                break;
+    case "9":
+        await deleteSubjectMenu();
+        break;
 
-            case "10":
-                console.log(
-                    "\nThank you for using GradeCalc."
-                );
+    case "10":
+        await deleteStudentMenu();
+        break;
 
-                rl.close();
-                return;
+    case "11":
+        console.log(
+            "\nThank you for using GradeCalc."
+        );
 
-            default:
-                console.log(
-                    "\nInvalid choice. Please try again."
-                );
-        }
+        rl.close();
+        return;
+
+    default:
+        console.log(
+            "\nInvalid choice. Please try again."
+        );
+}
     }
 }
 
