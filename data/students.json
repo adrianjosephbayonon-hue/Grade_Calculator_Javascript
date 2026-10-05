@@ -2,13 +2,33 @@
     {
         "id": "sherwin",
         "name": "sherwin",
-        "subject": "301",
-        "grades": {
-            "quiz": 92,
-            "assignments": 90,
-            "project": 90,
-            "midterm": 90,
-            "finalExam": 90
-        }
+        "subjects": [
+            {
+                "subject": "301",
+                "grades": {
+                    "quiz": 92,
+                    "assignments": 90,
+                    "project": 90,
+                    "midterm": 90,
+                    "finalExam": 90
+                }
+            }
+        ]
+    },
+    {
+        "id": "23-02076",
+        "name": "adrian",
+        "subjects": [
+            {
+                "subject": "cs301",
+                "grades": {
+                    "quiz": 80,
+                    "assignments": 90,
+                    "project": 100,
+                    "midterm": 100,
+                    "finalExam": 77
+                }
+            }
+        ]
     }
 ]

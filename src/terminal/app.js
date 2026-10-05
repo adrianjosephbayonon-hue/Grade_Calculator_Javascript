@@ -12,6 +12,9 @@ const {
     addStudent,
     getAllStudents,
     findStudent,
+    addSubject,
+    updateSubject,
+    deleteSubject,
     updateStudent,
     deleteStudent
 } = require("../services/studentService");
@@ -29,6 +32,85 @@ function ask(question) {
     });
 }
 
+async function askGrade(question) {
+    while (true) {
+        const input = await ask(question);
+        const value = Number(input);
+
+        if (validateGrade(value)) {
+            return value;
+        }
+
+        console.log(
+            "Invalid grade. Please enter a number from 0 to 100."
+        );
+    }
+}
+
+async function collectGrades() {
+    const quiz = await askGrade("Quiz Grade: ");
+    const assignments = await askGrade("Assignment Grade: ");
+    const project = await askGrade("Project Grade: ");
+    const midterm = await askGrade("Midterm Grade: ");
+    const finalExam = await askGrade("Final Exam Grade: ");
+
+    return {
+        quiz,
+        assignments,
+        project,
+        midterm,
+        finalExam
+    };
+}
+
+async function addStudentMenu() {
+    console.log("\n========== ADD STUDENT ==========\n");
+
+    const id = await ask("Student ID: ");
+    const name = await ask("Student Name: ");
+
+    try {
+        addStudent(id, name);
+
+        console.log("\nStudent successfully added.");
+
+        const addFirstSubject = await ask(
+            "Add a subject now? (Y/N): "
+        );
+
+        if (addFirstSubject.toLowerCase() === "y") {
+            await addSubjectMenu(id);
+        }
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
+async function addSubjectMenu(studentId = null) {
+    console.log("\n========== ADD SUBJECT ==========\n");
+
+    const id = studentId || await ask("Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    const subject = await ask("Subject: ");
+
+    const grades = await collectGrades();
+
+    try {
+        addSubject(id, subject, grades);
+
+        console.log("\nSubject successfully added.");
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
 async function calculateStudentMenu() {
     console.log("\n========== GRADE REPORT ==========\n");
 
@@ -41,18 +123,54 @@ async function calculateStudentMenu() {
         return;
     }
 
+    if (student.subjects.length === 0) {
+        console.log("\nThis student has no subjects.");
+        return;
+    }
+
+    console.log("\nSubjects:");
+
+    student.subjects.forEach((item, index) => {
+        console.log(`${index + 1}. ${item.subject}`);
+    });
+
+    const subjectNumber = Number(
+        await ask("\nSelect subject: ")
+    );
+
+    if (
+        Number.isNaN(subjectNumber) ||
+        subjectNumber < 1 ||
+        subjectNumber > student.subjects.length
+    ) {
+        console.log("\nInvalid subject selection.");
+        return;
+    }
+
+    const selectedSubject =
+        student.subjects[subjectNumber - 1];
+
     try {
-        const finalGrade = calculateFinalGrade(student.grades);
-        const breakdown = calculateBreakdown(student.grades);
-        const equivalent = getEquivalentGrade(finalGrade);
-        const status = getStatus(finalGrade);
+        const finalGrade = calculateFinalGrade(
+            selectedSubject.grades
+        );
+
+        const breakdown = calculateBreakdown(
+            selectedSubject.grades
+        );
+
+        const equivalent =
+            getEquivalentGrade(finalGrade);
+
+        const status =
+            getStatus(finalGrade);
 
         console.log("\n==============================================");
         console.log("              GRADE REPORT");
         console.log("==============================================");
         console.log(`Student:       ${student.name}`);
         console.log(`Student ID:    ${student.id}`);
-        console.log(`Subject:       ${student.subject}`);
+        console.log(`Subject:       ${selectedSubject.subject}`);
         console.log("----------------------------------------------");
 
         console.log(
@@ -135,7 +253,17 @@ async function viewStudentsMenu() {
 
     students.forEach((student, index) => {
         console.log(`${index + 1}. ${student.id} - ${student.name}`);
-        console.log(`   Subject: ${student.subject}`);
+
+        if (student.subjects.length === 0) {
+            console.log("   Subjects: None");
+        } else {
+            console.log("   Subjects:");
+
+            student.subjects.forEach(item => {
+                console.log(`      - ${item.subject}`);
+            });
+        }
+
         console.log("");
     });
 }
@@ -153,9 +281,20 @@ async function searchStudentMenu() {
     }
 
     console.log("\nStudent found:");
-    console.log(`ID:      ${student.id}`);
-    console.log(`Name:    ${student.name}`);
-    console.log(`Subject: ${student.subject}`);
+    console.log(`ID:   ${student.id}`);
+    console.log(`Name: ${student.name}`);
+
+    console.log("\nSubjects:");
+
+    if (student.subjects.length === 0) {
+        console.log("None");
+    } else {
+        student.subjects.forEach((item, index) => {
+            console.log(
+                `${index + 1}. ${item.subject}`
+            );
+        });
+    }
 }
 
 async function updateStudentMenu() {
@@ -170,38 +309,141 @@ async function updateStudentMenu() {
         return;
     }
 
-    console.log("\nCurrent Student Information:");
-    console.log(`Name:    ${student.name}`);
-    console.log(`Subject: ${student.subject}`);
+    console.log("\nCurrent Information:");
+    console.log(`Name: ${student.name}`);
 
-    console.log("\nEnter new information:");
-
-    const name = await ask("Student Name: ");
-    const subject = await ask("Subject: ");
-
-    const quiz = await askGrade("Quiz Grade: ");
-    const assignments = await askGrade("Assignment Grade: ");
-    const project = await askGrade("Project Grade: ");
-    const midterm = await askGrade("Midterm Grade: ");
-    const finalExam = await askGrade("Final Exam Grade: ");
-
-    const grades = {
-        quiz,
-        assignments,
-        project,
-        midterm,
-        finalExam
-    };
+    const name = await ask(
+        "\nEnter new student name: "
+    );
 
     try {
-        updateStudent(
+        updateStudent(id, name);
+
+        console.log(
+            "\nStudent information successfully updated."
+        );
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
+async function updateSubjectMenu() {
+    console.log("\n========== UPDATE SUBJECT ==========\n");
+
+    const id = await ask("Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    if (student.subjects.length === 0) {
+        console.log("\nThis student has no subjects.");
+        return;
+    }
+
+    student.subjects.forEach((item, index) => {
+        console.log(
+            `${index + 1}. ${item.subject}`
+        );
+    });
+
+    const subjectNumber = Number(
+        await ask("\nSelect subject: ")
+    );
+
+    if (
+        Number.isNaN(subjectNumber) ||
+        subjectNumber < 1 ||
+        subjectNumber > student.subjects.length
+    ) {
+        console.log("\nInvalid subject selection.");
+        return;
+    }
+
+    const selectedSubject =
+        student.subjects[subjectNumber - 1];
+
+    console.log(
+        `\nUpdating: ${selectedSubject.subject}`
+    );
+
+    const grades = await collectGrades();
+
+    try {
+        updateSubject(
             id,
-            name,
-            subject,
+            selectedSubject.subject,
             grades
         );
 
-        console.log("\nStudent successfully updated.");
+        console.log(
+            "\nSubject grades successfully updated."
+        );
+    } catch (error) {
+        console.log(`\nError: ${error.message}`);
+    }
+}
+
+async function deleteSubjectMenu() {
+    console.log("\n========== DELETE SUBJECT ==========\n");
+
+    const id = await ask("Student ID: ");
+
+    const student = findStudent(id);
+
+    if (!student) {
+        console.log("\nStudent not found.");
+        return;
+    }
+
+    if (student.subjects.length === 0) {
+        console.log("\nThis student has no subjects.");
+        return;
+    }
+
+    student.subjects.forEach((item, index) => {
+        console.log(
+            `${index + 1}. ${item.subject}`
+        );
+    });
+
+    const subjectNumber = Number(
+        await ask("\nSelect subject: ")
+    );
+
+    if (
+        Number.isNaN(subjectNumber) ||
+        subjectNumber < 1 ||
+        subjectNumber > student.subjects.length
+    ) {
+        console.log("\nInvalid subject selection.");
+        return;
+    }
+
+    const selectedSubject =
+        student.subjects[subjectNumber - 1];
+
+    const confirmation = await ask(
+        `Delete ${selectedSubject.subject}? (Y/N): `
+    );
+
+    if (confirmation.toLowerCase() !== "y") {
+        console.log("\nDelete operation cancelled.");
+        return;
+    }
+
+    try {
+        deleteSubject(
+            id,
+            selectedSubject.subject
+        );
+
+        console.log(
+            "\nSubject successfully deleted."
+        );
     } catch (error) {
         console.log(`\nError: ${error.message}`);
     }
@@ -222,7 +464,12 @@ async function deleteStudentMenu() {
     console.log("\nStudent to be deleted:");
     console.log(`ID:      ${student.id}`);
     console.log(`Name:    ${student.name}`);
-    console.log(`Subject: ${student.subject}`);
+
+    console.log("\nSubjects:");
+
+    student.subjects.forEach(item => {
+        console.log(`- ${item.subject}`);
+    });
 
     const confirmation = await ask(
         "\nAre you sure you want to delete this student? (Y/N): "
@@ -236,7 +483,9 @@ async function deleteStudentMenu() {
     try {
         deleteStudent(id);
 
-        console.log("\nStudent successfully deleted.");
+        console.log(
+            "\nStudent successfully deleted."
+        );
     } catch (error) {
         console.log(`\nError: ${error.message}`);
     }
@@ -251,12 +500,15 @@ async function mainMenu() {
 ========================================
 
 1. Add Student
-2. Calculate Grade
-3. View Student Records
-4. Search Student
-5. Update Student
-6. Delete Student
-7. Exit
+2. Add Subject
+3. Calculate Grade
+4. View Student Records
+5. Search Student
+6. Update Student
+7. Update Subject Grades
+8. Delete Subject
+9. Delete Student
+10. Exit
 
 ========================================
 `);
@@ -269,32 +521,49 @@ async function mainMenu() {
                 break;
 
             case "2":
-                await calculateStudentMenu();
+                await addSubjectMenu();
                 break;
 
             case "3":
-                await viewStudentsMenu();
+                await calculateStudentMenu();
                 break;
 
             case "4":
-                await searchStudentMenu();
+                await viewStudentsMenu();
                 break;
 
             case "5":
-                await updateStudentMenu();
+                await searchStudentMenu();
                 break;
 
             case "6":
-                await deleteStudentMenu();
+                await updateStudentMenu();
                 break;
 
             case "7":
-                console.log("\nThank you for using GradeCalc.");
+                await updateSubjectMenu();
+                break;
+
+            case "8":
+                await deleteSubjectMenu();
+                break;
+
+            case "9":
+                await deleteStudentMenu();
+                break;
+
+            case "10":
+                console.log(
+                    "\nThank you for using GradeCalc."
+                );
+
                 rl.close();
                 return;
 
             default:
-                console.log("\nInvalid choice. Please try again.");
+                console.log(
+                    "\nInvalid choice. Please try again."
+                );
         }
     }
 }

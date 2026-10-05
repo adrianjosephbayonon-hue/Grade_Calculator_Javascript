@@ -1,9 +1,15 @@
 class Student {
-    constructor(id, name, subject, grades) {
+    constructor(id, name, subjects = []) {
         this.id = id;
         this.name = name;
-        this.subject = subject;
-        this.grades = grades;
+        this.subjects = subjects;
+    }
+
+    addSubject(subject, grades) {
+        this.subjects.push({
+            subject,
+            grades
+        });
     }
 }
 
