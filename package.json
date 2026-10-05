@@ -4,8 +4,9 @@
   "description": "Grade Calculator System implemented in JavaScript for Programming Languages coursework",
   "main": "src/terminal/app.js",
   "scripts": {
-    "start": "node src/terminal/app.js"
-  },
+  "start": "node src/terminal/app.js",
+  "test": "node --test"
+},
   "keywords": [
     "grade-calculator",
     "javascript",
